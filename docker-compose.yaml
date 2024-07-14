@@ -1,0 +1,82 @@
+version: '3.5'
+
+services:
+  # survival:
+  #   container_name: minecraft_survival
+  #   image: itzg/minecraft-server
+  #   environment:
+  #     EULA: "TRUE"
+  #     TYPE: "PAPER"
+  #     # DEBUG: "TRUE"
+  #     ONLINE_MODE: "FALSE"
+  #     MODRINTH_MODPACK: "essentialsx"
+  #     SPIGET_RESOURCES: "28140,34315"
+  #     PLUGINS: "https://dev.bukkit.org/projects/worldguard/files/latest,https://dev.bukkit.org/projects/worldedit/files/latest"
+  #   volumes:
+  #     - ${MC_VOLUME_PATH}/survival:/data
+  #     - /etc/timezone:/etc/timezone:ro
+  #   stdin_open: true
+  #   tty: true
+  creative:
+    container_name: minecraft_creative
+    image: itzg/minecraft-server
+    environment:
+      EULA: "TRUE"
+      TYPE: "PAPER"
+      # DEBUG: "TRUE"
+      ONLINE_MODE: "FALSE"
+      MODE: "creative"
+      DIFFICULTY: "peaceful"
+    volumes:
+      - ${MC_VOLUME_PATH}/creative:/data
+      - /etc/timezone:/etc/timezone:ro
+    stdin_open: true
+    tty: true
+  # gtnh:
+  #   container_name: minecraft_gtnh
+  #   image: gtnh/gtnh
+  #   build:
+  #     context: .
+  #     dockerfile: ./gtnh-Dockerfile
+  #   ports:
+  #     - "25567:25565"
+  #   volumes:
+  #     - ${MC_VOLUME_PATH}/gtnh:/app
+  #     - /etc/timezone:/etc/timezone:ro
+  #   stdin_open: true
+  #   tty: true
+  proxy:
+    container_name: minecraft_velocity
+    image: itzg/bungeecord
+    environment:
+      TYPE: VELOCITY
+      DEBUG: "true"
+    ports:
+      - "25566:25577"
+    volumes:
+      - ./velocity.toml:/config/velocity.toml
+      - ./forwarding.secret:/server/forwarding.secret
+      - ${MC_VOLUME_PATH}/velocity:/server
+      - /etc/timezone:/etc/timezone:ro
+    stdin_open: true
+    tty: true
+  dozzle:
+    container_name: minecraft_dozzle
+    image: amir20/dozzle:latest
+    environment:
+      DOZZLE_AUTH_PROVIDER: simple
+      DOZZLE_ENABLE_ACTIONS: "true"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${MC_VOLUME_PATH}/dozzle:/data
+      - ./users.yml:/data/users.yml
+    ports:
+      - 8888:8080
+  mumble:
+    container_name: mumble
+    image: mumblevoip/mumble-server:latest
+    hostname: mumble
+    restart: on-failure
+    ports:
+      - 64738:64738
+      - 64738:64738/udp
